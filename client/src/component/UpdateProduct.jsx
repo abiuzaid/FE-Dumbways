@@ -1,12 +1,14 @@
 import React from "react";
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Tmb from "../assets/image/Thumbnail.png";
 import { Button, Form } from "react-bootstrap";
+import axios from "axios";
 
 function UpdateProduct() {
+  const navigate = useNavigate();
   const params = useParams();
   const id = parseInt(params.id);
   const [imageUrl, setImageUrl] = useState("/image/product-placeholder.webp");
@@ -23,19 +25,26 @@ function UpdateProduct() {
     const file = e.target.files[0];
     const imageUrl = URL.createObjectURL(file);
     setImageUrl(imageUrl);
+    setAddProduct({ ...addProduct, photo: file });
   };
 
-  const fetchProduct = () => {
-    const getProduct = JSON.parse(localStorage.getItem("dataProduct"));
-    const findProduct = getProduct.find((product) => product.id === id);
+  const fetchProduct = async () => {
+    const results = await axios.get(
+      "http://localhost:5000/api/v1/product/" + id
+    );
     setAddProduct({
-      ...findProduct,
+      name: results.data.data.name,
+      stok: results.data.data.stock,
+      price: results.data.data.price,
+      description: results.data.data.description,
+      photo: results.data.data.photo,
     });
+
+    setImageUrl("http://localhost:5000/uploads/" + results.data.data.photo);
   };
 
   useEffect(() => {
     fetchProduct();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onChangeHandler = (e) => {
@@ -45,21 +54,49 @@ function UpdateProduct() {
     });
   };
 
-  const onSubmitHandler = (e) => {
+  const onSubmitHandler = async (e) => {
+    const userData = JSON.parse(localStorage.getItem("loginUser") ?? {});
     e.preventDefault();
 
-    const dataProduct = JSON.parse(localStorage.getItem("dataProduct"));
+    const requestBody = new FormData();
+    requestBody.append("name", addProduct.name);
+    requestBody.append("price", addProduct.price);
+    requestBody.append("description", addProduct.description);
+    requestBody.append("stock", addProduct.stok);
+    requestBody.append("photo", addProduct.photo);
 
-    const indexProduct = dataProduct.findIndex((item) => item.id === id);
-    dataProduct[indexProduct] = addProduct;
-    localStorage.setItem("dataProduct", JSON.stringify(dataProduct));
+    // Send data to backend
+
+    const results = await axios.patch(
+      "http://localhost:5000/api/v1/product/" + id,
+      requestBody,
+      {
+        headers: {
+          Authorization: "Bearer " + userData.token,
+        },
+      }
+    );
+
+    // Navigate Ke List Product
+    navigate("/list-product");
+    // const dataProduct = JSON.parse(localStorage.getItem("dataProduct"));
+
+    // const indexProduct = dataProduct.findIndex((item) => item.id === id);
+    // dataProduct[indexProduct] = addProduct;
+    // localStorage.setItem("dataProduct", JSON.stringify(dataProduct));
   };
 
   return (
     <div>
-      <div className="container d-flex justify-content-around align-items-center my-5" style={{ marginTop: 46 }}>
+      <div
+        className="container d-flex justify-content-around align-items-center my-5"
+        style={{ marginTop: 46 }}
+      >
         <div style={{ width: 472 }}>
-          <p className="fw-bold fs-3" style={{ color: "#613D2B", marginBottom: 31 }}>
+          <p
+            className="fw-bold fs-3"
+            style={{ color: "#613D2B", marginBottom: 31 }}
+          >
             Add Product
           </p>
 
@@ -123,7 +160,13 @@ function UpdateProduct() {
                 value={addProduct.description}
                 onChange={onChangeHandler}
                 id="description"
-                style={{ height: 150, resize: "none", textColor: "#613D2B", backgroundColor: "rgba(97, 61, 43, 0.25)", border: "2px solid #613D2B" }}
+                style={{
+                  height: 150,
+                  resize: "none",
+                  textColor: "#613D2B",
+                  backgroundColor: "rgba(97, 61, 43, 0.25)",
+                  border: "2px solid #613D2B",
+                }}
               ></textarea>
             </div>
 
@@ -141,7 +184,14 @@ function UpdateProduct() {
             >
               <Form.Label className="d-flex">
                 <div className="d-flex justify-content-between align-text-center">
-                  <Form.Control name="photo" type="file" hidden placeholder="Photo Product" cursor="pointer" onChange={handleImageUpload} />
+                  <Form.Control
+                    name="photo"
+                    type="file"
+                    hidden
+                    placeholder="Photo Product"
+                    cursor="pointer"
+                    onChange={handleImageUpload}
+                  />
                   <p className="m-0 mt-2 ms-2" style={{ color: "grey" }}>
                     Photo Product
                   </p>

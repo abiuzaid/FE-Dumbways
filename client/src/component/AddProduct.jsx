@@ -46,44 +46,36 @@ function AddProduct() {
     const userData = JSON.parse(localStorage.getItem("loginUser") ?? {});
     e.preventDefault();
 
-    const requestBody = new FormData()
-    requestBody.append('name', addProduct.name)
-    requestBody.append('price', addProduct.price)
-    requestBody.append('description', addProduct.description)
-    requestBody.append('stock', addProduct.stock)
-    requestBody.append('photo', addProduct.photo)
+    const requestBody = new FormData();
+    requestBody.append("name", addProduct.name);
+    requestBody.append("price", addProduct.price);
+    requestBody.append("description", addProduct.description);
+    requestBody.append("stock", addProduct.stock);
+    requestBody.append("photo", addProduct.photo);
 
     const results = await axios.post(
-      "http://localhost:5000/api/v1/product", 
-      requestBody, {
+      "http://localhost:5000/api/v1/product",
+      requestBody,
+      {
         headers: {
           Authorization: "Bearer " + userData.token,
         },
-      })
-      navigate("/list-product")
-
-    // const newProduct = {
-    //   ...addProduct,
-    //   id: new Date().getTime(),
-    //   photo: imageUrl,
-    // };
-
-    // const dataProduct = JSON.parse(localStorage.getItem("dataProduct"));
-
-    // if (dataProduct === null) {
-    //   localStorage.setItem("dataProduct", JSON.stringify([newProduct]));
-    // } else {
-    //   dataProduct.push(newProduct);
-    //   localStorage.setItem("dataProduct", JSON.stringify(dataProduct));
-    // }
-    // navigate("/list-product");
+      }
+    );
+    navigate("/list-product");
   };
 
   return (
     <div>
-      <div className="container d-flex justify-content-around align-items-center my-5" style={{ marginTop: 46 }}>
+      <div
+        className="container d-flex justify-content-around align-items-center my-5"
+        style={{ marginTop: 46 }}
+      >
         <div style={{ width: 472 }}>
-          <p className="fw-bold fs-3" style={{ color: "#613D2B", marginBottom: 31 }}>
+          <p
+            className="fw-bold fs-3"
+            style={{ color: "#613D2B", marginBottom: 31 }}
+          >
             Add Product
           </p>
 
@@ -108,10 +100,10 @@ function AddProduct() {
               <input
                 type="number"
                 className="form-control p-2"
-                name="stok"
-                placeholder="Stok"
+                name="stock"
+                placeholder="Stock"
                 onChange={onChangeHandler}
-                id="stok"
+                id="stock"
                 style={{
                   textColor: "#613D2B",
                   backgroundColor: "rgba(97, 61, 43, 0.25)",
@@ -143,7 +135,13 @@ function AddProduct() {
                 placeholder="Description Product"
                 onChange={onChangeHandler}
                 id="description"
-                style={{ height: 150, resize: "none", textColor: "#613D2B", backgroundColor: "rgba(97, 61, 43, 0.25)", border: "2px solid #613D2B" }}
+                style={{
+                  height: 150,
+                  resize: "none",
+                  textColor: "#613D2B",
+                  backgroundColor: "rgba(97, 61, 43, 0.25)",
+                  border: "2px solid #613D2B",
+                }}
               ></textarea>
             </div>
 
@@ -161,7 +159,14 @@ function AddProduct() {
             >
               <Form.Label className="d-flex">
                 <div className="d-flex justify-content-between align-text-center">
-                  <Form.Control name="photo" type="file" hidden placeholder="Photo Product" cursor="pointer" onChange={handleFileOnChange} />
+                  <Form.Control
+                    name="photo"
+                    type="file"
+                    hidden
+                    placeholder="Photo Product"
+                    cursor="pointer"
+                    onChange={handleFileOnChange}
+                  />
                   <p className="m-0 mt-2 ms-2" style={{ color: "grey" }}>
                     Photo Product
                   </p>

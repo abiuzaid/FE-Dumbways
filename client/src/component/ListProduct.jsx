@@ -2,26 +2,33 @@ import React from "react";
 import { Button, Container, Table } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function ListProduct() {
   const [listProduct, setListProduct] = useState([]);
 
-  function getListProduct() {
-    const getProduct = JSON.parse(localStorage.getItem("dataProduct"));
+    const panggilDataProduct = async () => {
+      // Panggil Data Backend
+      const results = await axios.get("http://localhost:5000/api/v1/product");
+  
+      setListProduct(results.data.data);
+    };
+  
+    useEffect(() => {
+      panggilDataProduct()
+    }, []);
+  //   const getProduct = JSON.parse(localStorage.getItem("dataProduct"));
 
-    setListProduct(getProduct);
-  }
-
-
-
-  useEffect(() => {
-    getListProduct();
-  }, []);
+  //   setListProduct(getProduct);
+  // }
+  // useEffect(() => {
+  //   getListProduct();
+  // }, []);
 
   function deleteProduct(id) {
     const newList = listProduct.filter((item) => item.id !== id);
     localStorage.setItem("dataProduct", JSON.stringify(newList));
-    getListProduct();
+    // getListProduct();
   }
 
   const navigate = useNavigate();
@@ -47,10 +54,10 @@ function ListProduct() {
               <tr key={item.id}>
                 <td>{index + 1}</td>
                 <td>
-                  <img src={item.photo} alt={item.name} style= {{ width:"25px",  }} />
+                  <img src={`http://localhost:5000/uploads/${item.photo}`} alt={item.name} style= {{ width:"25px",  }} />
                 </td>
                 <td>{item.name}</td>
-                <td>{item.stok}</td>
+                <td>{item.stock}</td>
                 <td>{item.price}</td>
                 <td>{item.description}</td>
                 <td style={{ width: "15rem" }}>
