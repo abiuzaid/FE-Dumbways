@@ -5,6 +5,7 @@ import { useState } from "react";
 import Tmb from "../assets/image/Thumbnail.png";
 import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function AddProduct() {
   const [imageUrl, setImageUrl] = useState("/image/product-placeholder.webp");
@@ -16,18 +17,17 @@ function AddProduct() {
   };
 
   const handleFileOnChange = (e) => {
-    let fileName = (e.target.files[0].name);
-    setImageUrl(`/image/${fileName}`);
+    setImageUrl(URL.createObjectURL(e.target.files[0]));
     setAddProduct({
       ...addProduct,
-      photo: `/image/${fileName}`,
+      photo: e.target.files[0],
     });
   };
 
   const [addProduct, setAddProduct] = useState({
     id: new Date().getTime(),
     name: "",
-    stok: "",
+    stock: "",
     price: "",
     description: "",
     photo: "",
@@ -42,24 +42,41 @@ function AddProduct() {
 
   const navigate = useNavigate();
 
-  const onSubmitHandler = (e) => {
+  const onSubmitHandler = async (e) => {
+    const userData = JSON.parse(localStorage.getItem("loginUser") ?? {});
     e.preventDefault();
 
-    const newProduct = {
-      ...addProduct,
-      id: new Date().getTime(),
-      photo: imageUrl,
-    };
+    const requestBody = new FormData()
+    requestBody.append('name', addProduct.name)
+    requestBody.append('price', addProduct.price)
+    requestBody.append('description', addProduct.description)
+    requestBody.append('stock', addProduct.stock)
+    requestBody.append('photo', addProduct.photo)
 
-    const dataProduct = JSON.parse(localStorage.getItem("dataProduct"));
+    const results = await axios.post(
+      "http://localhost:5000/api/v1/product", 
+      requestBody, {
+        headers: {
+          Authorization: "Bearer " + userData.token,
+        },
+      })
+      navigate("/list-product")
 
-    if (dataProduct === null) {
-      localStorage.setItem("dataProduct", JSON.stringify([newProduct]));
-    } else {
-      dataProduct.push(newProduct);
-      localStorage.setItem("dataProduct", JSON.stringify(dataProduct));
-    }
-    navigate("/list-product");
+    // const newProduct = {
+    //   ...addProduct,
+    //   id: new Date().getTime(),
+    //   photo: imageUrl,
+    // };
+
+    // const dataProduct = JSON.parse(localStorage.getItem("dataProduct"));
+
+    // if (dataProduct === null) {
+    //   localStorage.setItem("dataProduct", JSON.stringify([newProduct]));
+    // } else {
+    //   dataProduct.push(newProduct);
+    //   localStorage.setItem("dataProduct", JSON.stringify(dataProduct));
+    // }
+    // navigate("/list-product");
   };
 
   return (

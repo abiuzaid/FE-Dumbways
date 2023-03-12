@@ -48,11 +48,6 @@ function UpdateProduct() {
   const onSubmitHandler = (e) => {
     e.preventDefault();
 
-    // const newProduct = {
-    //   ...addProduct,
-    //   photo: imageUrl,
-    // };
-
     const dataProduct = JSON.parse(localStorage.getItem("dataProduct"));
 
     const indexProduct = dataProduct.findIndex((item) => item.id === id);
